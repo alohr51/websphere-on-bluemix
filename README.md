@@ -1,11 +1,11 @@
 # WebSphere On Bluemix
 ##### [WebSphere On Bluemix](https://console.ng.bluemix.net/docs/services/ApplicationServeronCloud/index.html) Node.js Client.
 
-This client is built to help you quickly access and get started with the WebSphere On Bluemix.
-[Installation](#installation)
-[Getting Started](#getting-started)
-[API Reference](#api-reference)
-[Run Tests](#run-the-tests)
+This client is built to help you quickly access and get started with the WebSphere On Bluemix.  
+[Installation](#installation)  
+[Getting Started](#getting-started)  
+[API Reference](#api-reference)  
+[Run Tests](#run-the-tests)  
 
 
 ### Installation
