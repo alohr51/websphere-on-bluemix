@@ -1,11 +1,11 @@
 {
   "name": "websphere-on-bluemix",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Node.js client for the WebSphere On Bluemix API.",
   "main": "websphere-on-bluemix.js",
-  "repository" :{
-    "type" : "git",
-    "url" : "https://github.com/alohr51/websphere-on-bluemix.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alohr51/websphere-on-bluemix.git"
   },
   "author": "Andrew Lohr",
   "dependencies": {
