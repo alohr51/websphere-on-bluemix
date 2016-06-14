@@ -1,0 +1,12 @@
+{
+  "name": "websphere-on-bluemix",
+  "version": "1.0.0",
+  "description": "A Node.js client for the WebSphere On Bluemix API.",
+  "main": "websphere-on-bluemix.js",
+  "author": "Andrew Lohr",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
+    "request": "^2.72.0"
+  }
+}
