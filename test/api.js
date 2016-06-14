@@ -42,13 +42,13 @@ describe('WebSphere on Bluemix', function() {
     });
 
     it('sets credentials', function() {
-        var wob = new WebSphere_on_Bluemix({api_url:"https://testAPI.com/wasaas-broker/api/v1", username:"iamtestus3rname", password:"iamtestp@ssword"});
-        expect(wob.api_url).to.equal("https://testAPI.com/wasaas-broker/api/v1");
+        var wob = new WebSphere_on_Bluemix({api_url:"https://testAPI.com/api/v1", username:"iamtestus3rname", password:"iamtestp@ssword"});
+        expect(wob.api_url).to.equal("https://testAPI.com/api/v1");
         expect(wob.username).to.equal("iamtestus3rname");
         expect(wob.password).to.equal("iamtestp@ssword");
     });
     it('fails with missing credentials', function() {
-        expect(function(){WebSphere_on_Bluemix({api_url:"https://testAPI.com/wasaas-broker/api/v1", username:"iamtestus3rname"})}).to.throw("Error");
+        expect(function(){WebSphere_on_Bluemix({api_url:"https://testAPI.com/api/v1", username:"iamtestus3rname"})}).to.throw("Error");
     });
 });
 

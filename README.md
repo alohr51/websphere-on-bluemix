@@ -38,6 +38,7 @@ The docs for the WebSphere On Bluemix API can be found [here](https://new-consol
 
 ### Run the tests
   The test framework used is mocha.js with the chai assertion library.
+
 1. Ensure mocha.js and chai are installed
    * `npm install --save mocha`
    * `npm install --save chai`

@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "A Node.js client for the WebSphere On Bluemix API.",
   "main": "websphere-on-bluemix.js",
+  "repository" :{
+    "type" : "git",
+    "url" : "https://github.com/alohr51/websphere-on-bluemix.git"
+  },
   "author": "Andrew Lohr",
   "dependencies": {
     "chai": "^3.5.0",
