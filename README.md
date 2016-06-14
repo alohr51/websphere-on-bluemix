@@ -45,6 +45,6 @@ The docs for the WebSphere On Bluemix API can be found [here](https://new-consol
 1. cd to the projects root: `/websphere-on-bluemix`
 1. Set environment variables
    * `set api_url=your_api_url`
-   * `set api_url=username`
-   * `set api_url=password`
+   * `set username=username`
+   * `set password=password`
 1. `node ./node_modules/mocha/bin/mocha --timeout 15000`
