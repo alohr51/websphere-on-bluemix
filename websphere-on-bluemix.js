@@ -50,7 +50,7 @@ WebSphereOnBluemix.prototype.get_bearer_token = function (callback){
 
 WebSphereOnBluemix.prototype.refresh_bearer_token = function (callback){
     // need to figure out what url to use compared to what the user provides for api_url
-    var bluemix_oauth_url = "https://login.stage1.ng.bluemix.net/UAALoginServerWAR";
+    var bluemix_oauth_url = "https://login.ng.bluemix.net/UAALoginServerWAR";
     var self = this;
     var request_options = {
         url: bluemix_oauth_url + "/oauth/token",
