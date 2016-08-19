@@ -34,7 +34,10 @@ wob.get_service_instances({organization:"YOUR_ORG", space:"YOUR_SPACE"}, functio
 ```
 
 ### API Reference
-The docs for the WebSphere On Bluemix API can be found [here](https://new-console.ng.bluemix.net/apidocs/212)
+WebSphere on Bluemix provides Swagger UI API Documentation in 3 different environments:
+  * [Dallas, USA](https://wasaas-broker.ng.bluemix.net/wasaas-broker/api)
+  * [London, UK](https://wasaas-broker.eu-gb.bluemix.net/wasaas-broker/api)
+  * [Sydney, AUS](https://wasaas-broker.au-syd.bluemix.net/wasaas-broker/api)
 
 ### Run the tests
   The test framework used is mocha.js with the chai assertion library.
