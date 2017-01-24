@@ -37,7 +37,7 @@ wob.get_service_instances({organization:"YOUR_ORG", space:"YOUR_SPACE"}, functio
 ```
 ### More Examples.
 
-There are more example in the example folder.
+There are more example in [examples.js](https://github.com/alohr51/websphere-on-bluemix/blob/master/example/examples.js).
 
 ### API Reference
 WebSphere on Bluemix provides Swagger UI API Documentation in 3 different environments:
