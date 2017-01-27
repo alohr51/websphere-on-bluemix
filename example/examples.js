@@ -1,5 +1,5 @@
 var Wasaas = require("./websphere-on-bluemix");
-var wasaas = new Wasaas({api_url:"YOUR_API_URL", api_version: "v1", username:"YOUR_USERNAME", password:"YOUR_PASS"});
+var wob = new Wasaas({api_url:"YOUR_API_URL", api_version: "v1", username:"YOUR_USERNAME", password:"YOUR_PASS"});
 
 // Get all organizations
 wob.get_organizations(function(err, orgs){
