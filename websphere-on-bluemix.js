@@ -482,6 +482,30 @@ WebSphereOnBluemix.prototype.action_resource = function(options,  callback) {
 	});
 };
 
+// Continually check if a subscriptions resources are ready and returns the resource info when it is ready
+WebSphereOnBluemix.prototype.monitor_resources = function(options,  callback) {
+	var self = this;
+	check_status();
+	var intervalID = setInterval(check_status, 3 * 60 * 1000);
+
+	function check_status(){
+		self.get_resources(options, function(err, resource){
+			if(err){
+				console.log(err);
+				clearInterval(intervalID);
+				return callback(err, null);
+			}
+			else{
+				var resourceJSON = JSON.parse(resource);
+				if(resourceJSON.length > 0){
+					clearInterval(intervalID);
+					return callback(null, resource);
+				}
+			}
+		});
+	}
+}
+
 WebSphereOnBluemix.prototype.send_request = function (request_options, callback){
 	var self = this;
 	request(request_options, function (err, res, body) {
@@ -499,7 +523,6 @@ WebSphereOnBluemix.prototype.send_request = function (request_options, callback)
 					}
 					// The request was good, but the API told us something went wrong.
 					else if (res.statusCode != 200) {
-						console.error("Failed request on retry: " + JSON.stringify(body));
 						return callback(JSON.stringify(body));
 					}
 					// Request was successful.
@@ -519,6 +542,5 @@ WebSphereOnBluemix.prototype.send_request = function (request_options, callback)
 		}
 	});
 };
-
 
 module.exports = WebSphereOnBluemix;
