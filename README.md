@@ -19,15 +19,16 @@ run npm install with the --save option to automatically add the dependency to yo
 ```
 // Load the WebSphere On Bluemix library.
 var Wob = require('websphere-on-bluemix');
-var user = 'myBluemixUsername'; // Use your Bluemix Account.
-var pass = process.env.my_bluemix_password; // Use your Bluemix Password
+var user = 'myBluemixUsername'; // Use your Bluemix Account, optionally can be 'apikey' if you want to use your api key
+var pass = process.env.my_bluemix_password; // Use your Bluemix Password or api key if user is 'apikey'
 var url = 'my_api_url' // Your WebSphere On Bluemix API url. For example: https://wasaas-broker.ng.bluemix.net/wasaas-broker/api
 var version = 'v1' // the api version
+
 // Initialize WebSphere On Bluemix with your account.
 var wob = new Wob({api_url:url, api_version: version, username:user, password:pass});
 
 // Create a Small Liberty Core and then start monitoring it for completion using "monitor_resources" feature.
-wob.create_single_server_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCore", name:"myWASaaSLibertyCore", application_server_vm_size:"S" }, function(err, serviceDetails){
+wob.create_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCore", name:"myWASaaSLibertyCore", application_server_vm_size:"S" }, function(err, serviceDetails){
 	if(err){
 		console.error(err);
 	}
@@ -65,7 +66,7 @@ The test framework used is mocha.js with the chai assertion library.
 1. Ensure dependencies are installed
 	 * `npm install`
 1. Set environment variables
-	 * `set api_url=your_api_url`
-	 * `set username=username`
-	 * `set password=password`
+	 * `api_url=your_api_url`
+	 * `username=username`
+	 * `password=password`
 1. `node ./node_modules/mocha/bin/mocha --timeout 15000`

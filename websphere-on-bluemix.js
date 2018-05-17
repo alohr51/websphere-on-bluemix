@@ -1,4 +1,6 @@
 var request = require('request');
+const validMultiServerValues = ["WASCell", "LibertyCollective"];
+const validSingleServerValues = ["LibertyCore", "LibertyNDServer", "WASBase", "WASNDServer"];
 
 var WebSphereOnBluemix = function(credentials){
 	this.api_url = credentials.api_url;
@@ -7,7 +9,8 @@ var WebSphereOnBluemix = function(credentials){
 	this.password = credentials.password;
 
 	// Validate credentials.
-	if(this.api_url === undefined || this.api_version === undefined || this.username === undefined || this.password === undefined || this.api_url === "" || this.username === "" || this.password === "" || this.api_version === "") {
+	if(typeof this.api_url === "undefined" || typeof this.api_version === "undefined" || typeof this.username === "undefined" ||
+		typeof this.password === "undefined" || this.api_url === "" || this.username === "" || this.password === "" || this.api_version === "") {
 		throw Error("WebSphereOnBluemix Initialization Error: api_url, api_version, username, and password must all be defined.");
 	}
 
@@ -19,8 +22,9 @@ var WebSphereOnBluemix = function(credentials){
 
 WebSphereOnBluemix.prototype.get_bearer_token = function (callback){
 	// Check if the bearer token is set and not expired.
-	if (this.bearer_token)
+	if (this.bearer_token){
 		return callback(null, this.bearer_token);
+	}
 
 	var self = this;
 	var request_options = {
@@ -56,8 +60,9 @@ WebSphereOnBluemix.prototype.get_bearer_token = function (callback){
 WebSphereOnBluemix.prototype.get_organizations = function(callback) {
 	var self = this;
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err, null);
+		}
 		var request_options = {
 			url: self.api_url + "/organizations",
 			method: "GET",
@@ -76,14 +81,17 @@ WebSphereOnBluemix.prototype.get_organizations = function(callback) {
 // Get an org by name.
 WebSphereOnBluemix.prototype.get_organization_by_name = function(options, callback) {
 	var self = this;
-	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
-			return callback(err);
 
-		// Validate the user provided an org.
-		var organization_name = options.organization;
-		if (organization_name === undefined || organization_name === "")
-			return callback("organization name must be defined.", null);
+	// Validate the user provided an org.
+	var organization_name = options.organization;
+	if (typeof organization_name === "undefined" || organization_name === ""){
+		return callback("organization name must be defined.", null);
+	}
+
+	this.get_bearer_token(function (err, bearer_token) {
+		if (err){
+			return callback(err);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name,
@@ -103,14 +111,17 @@ WebSphereOnBluemix.prototype.get_organization_by_name = function(options, callba
 // Get all spaces in a given org.
 WebSphereOnBluemix.prototype.get_spaces = function(options, callback) {
 	var self = this;
-	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
-			return callback(err);
 
-		// Validate the user provided an org.
-		var organization_name = options.organization;
-		if (organization_name === undefined || organization_name === "")
-			return callback("options must be passed in with organization defined.", null);
+	// Validate the user provided an org.
+	var organization_name = options.organization;
+	if (typeof organization_name === "undefined" || organization_name === ""){
+		return callback("options must be passed in with organization defined.", null);
+	}
+
+	this.get_bearer_token(function (err, bearer_token) {
+		if (err){
+			return callback(err);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces",
@@ -129,15 +140,18 @@ WebSphereOnBluemix.prototype.get_spaces = function(options, callback) {
 // Get a space given an org and space name.
 WebSphereOnBluemix.prototype.get_space_by_name = function(options,  callback) {
 	var self = this;
-	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
-			return callback(err);
 
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name === undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	this.get_bearer_token(function (err, bearer_token) {
+		if (err){
+			return callback(err);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name,
@@ -153,78 +167,59 @@ WebSphereOnBluemix.prototype.get_space_by_name = function(options,  callback) {
 	});
 };
 
-// Create a WebSphere on Bluemix single server service instance.
-WebSphereOnBluemix.prototype.create_single_server_service_instance = function(options,  callback) {
+// Create a WebSphere on IBM Cloud service instance.
+WebSphereOnBluemix.prototype.create_service_instance = function(options,  callback) {
 	var self = this;
+	var isMultiServer;
+
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name == "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	var type = options.type;
+	var name = options.name;
+	if(typeof name == "undefined" || name === ""){
+		return callback("name must be defined", null);
+	}
+
+	// check for a valid type
+	if(validMultiServerValues.indexOf(type) > -1){
+		isMultiServer = true;
+	}
+	else if(validSingleServerValues.indexOf(type) > -1){
+		isMultiServer = false;
+	}
+	else{
+		return callback("type must be one of the following: " + validSingleServerValues.join(", ") + ", " + validMultiServerValues.join(", "), null);
+	}
+
+	// If false, doProvision allows us to create a subscription without provisioning it so the user can configure it to their needs through
+	// another means (for example the IBM Cloud UI)
+	// if doProvision is not specified the default is true
+	var do_provision = options.doProvision;
+	do_provision = typeof do_provision === "undefined" ? true : options.doProvision;
+	if(typeof do_provision  !== "boolean"){
+		return callback("doProvision must be one of: true, false", null);
+	}
+
+	var service_instance_obj = isMultiServer ? getMultiServerBody(do_provision, options, callback) : getSingleServerBody(do_provision, options, callback);
+	// if there were some validation issues with the users options we will return and not send the request
+	if(service_instance_obj === false){
+		return;
+	}
+
+	do_provision = do_provision ? "yes" : "no";
+
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err);
-
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate the type (or plan) of the service instance provided, the name of the service, and the size (S, M, L, XL, XXL);
-		var type = options.type;
-		var name = options.name;
-		var application_server_vm_size = options.application_server_vm_size;
-
-		if(typeof(type) === 'undefined' ||  type === '' || (type !== 'LibertyCore' && type !== 'LibertyNDServer' && type !== 'WASBase' && type !== 'WASNDServer'))
-			return callback("type must be one of single server: 'LibertyCore', 'LibertyNDServer', 'WASBase', 'WASNDServer' ", null);
-
-		if (name == undefined || application_server_vm_size === undefined || name === "" || application_server_vm_size === "")
-			return callback("name, and application_server_vm_size must be defined.", null);
-
-		var service_instance_obj = {Type: type, Name: name, ApplicationServerVMSize: application_server_vm_size};
+		}
 
 		var request_options = {
-			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances",
-			method: "POST",
-			headers: {
-				'Accept': 'application/json'
-			},
-			retryStrategy: self.refresh_retry_policy,
-			'auth': {
-				'bearer': bearer_token
-			},
-			json: service_instance_obj
-		};
-		self.send_request(request_options, callback);
-	});
-};
-
-// Create a WebSphere on Bluemix cell or collective service instance.
-WebSphereOnBluemix.prototype.create_multi_server_service_instance = function(options,  callback) {
-	var self = this;
-	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
-			return callback(err);
-
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate the type (or plan) of the service instance provided, the name of the service, and the size (S, M, L, XL, XXL);
-		var type = options.type;
-		var name = options.name;
-		var application_server_vm_size = options.application_server_vm_size;
-		var control_server_vm_size = options.control_server_vm_size;
-		var num_app_vms = options.number_of_app_vms;
-
-		if(typeof(type) === 'undefined' ||  type === "" || (type !== 'LibertyCollective' && type !== 'WASCell'))
-			return callback("type must be one of Cell or Collective: 'LibertyCollective', 'WASCell' ", null);
-
-		if (typeof(name) == "undefined" || name === "" || typeof(application_server_vm_size) === "undefined" || application_server_vm_size === "" || typeof(control_server_vm_size) === "undefined" || control_server_vm_size === "" || typeof(num_app_vms) === "undefined" || num_app_vms === "")
-			return callback("name, control_server_vm_size, and application_server_vm_size must be defined.", null);
-
-		var service_instance_obj = {Type: type, Name: name, ApplicationServerVMSize: application_server_vm_size, ControlServerVMSize: control_server_vm_size, NumberOfApplicationVMs: num_app_vms};
-
-		var request_options = {
-			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances",
+			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances?provision=" + do_provision,
 			method: "POST",
 			auth: {
 				'Accept': 'application/json'
@@ -239,18 +234,48 @@ WebSphereOnBluemix.prototype.create_multi_server_service_instance = function(opt
 	});
 };
 
+function getSingleServerBody(doProvision, options, callback){
+	// if doProvision is false the size doesn't matter as the user will configure it later, the API still wants a size to be happy though
+	var application_server_vm_size = doProvision ? options.application_server_vm_size : "S";
+
+	if(typeof application_server_vm_size === "undefined" || application_server_vm_size === ""){
+		callback("application_server_vm_size must be defined.", null);
+		return false;
+	}
+
+	return {Type: options.type, Name: options.name, ApplicationServerVMSize: application_server_vm_size};
+}
+
+function getMultiServerBody(doProvision, options, callback){
+	// if doProvision if false these values do not matter as the user will configure it later, but the API still requires they are sent
+	var application_server_vm_size = doProvision ? options.application_server_vm_size : "S";
+	var control_server_vm_size = doProvision ? options.control_server_vm_size : "S";
+	var num_app_vms = doProvision ? options.number_of_app_vms : 1;
+
+	if (typeof application_server_vm_size === "undefined" || application_server_vm_size === "" || typeof control_server_vm_size === "undefined" ||
+		control_server_vm_size === "" || typeof num_app_vms === "undefined" || num_app_vms === ""){
+		callback("control_server_vm_size, application_server_vm_size, and num_app_vms must all be defined.", null);
+		return false;
+	}
+
+	return {Type: options.type, Name: options.name, ApplicationServerVMSize: application_server_vm_size, ControlServerVMSize: control_server_vm_size, NumberOfApplicationVMs: num_app_vms};
+}
+
 // Get all service instances in a given org and space.
 WebSphereOnBluemix.prototype.get_service_instances = function(options,  callback) {
 	var self = this;
-	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
-			return callback(err);
 
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	this.get_bearer_token(function (err, bearer_token) {
+		if (err){
+			return callback(err);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances",
@@ -270,21 +295,25 @@ WebSphereOnBluemix.prototype.get_service_instances = function(options,  callback
 // Get a single service instance with respect to a service ID.
 WebSphereOnBluemix.prototype.get_service_instance = function(options,  callback) {
 	var self = this;
+
+	// Validate the user provided and org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	// Validate user provided a service id.
+	var service_instance_id = options.service_instance_id;
+
+	if (typeof service_instance_id === "undefined" || service_instance_id === ""){
+		return callback("service_instance_id must be defined.", null);
+	}
+
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err);
-
-		// Validate the user provided and org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate user provided a service id.
-		var service_instance_id = options.service_instance_id;
-
-		if (service_instance_id === undefined || service_instance_id === "")
-			return callback("service_instance_id must be defined.", null);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances/" + service_instance_id,
@@ -304,25 +333,30 @@ WebSphereOnBluemix.prototype.get_service_instance = function(options,  callback)
 // Apply an action to all resources with respect to a service ID.
 WebSphereOnBluemix.prototype.action_resources = function(options,  callback) {
 	var self = this;
+
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof "space_name" === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	// Validate the user provided a service id.
+	var service_instance_id = options.service_instance_id;
+	if (typeof service_instance_id === "undefined" || service_instance_id === ""){
+		return callback("service_instance_id must be defined.", null);
+	}
+
+	// Validate the user provided an action.
+	var action = options.action;
+	if (typeof action === "undefined" || action === ""){
+		return callback("action must be defined.", null);
+	}
+
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err);
-
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate the user provided a service id.
-		var service_instance_id = options.service_instance_id;
-		if (service_instance_id === undefined || service_instance_id === "")
-			return callback("service_instance_id must be defined.", null);
-
-		// Validate the user provided an action.
-		var action = options.action;
-		if (action === undefined || action === "")
-			return callback("action must be defined.", null);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances/" + service_instance_id + "?action=" + action,
@@ -341,21 +375,25 @@ WebSphereOnBluemix.prototype.action_resources = function(options,  callback) {
 // Delete a service instance given a service instance ID.
 WebSphereOnBluemix.prototype.delete_service_instance = function(options,  callback) {
 	var self = this;
+
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	// Validate user provided a service id.
+	var service_id = options.service_instance_id;
+
+	if (typeof service_id === "undefined" || service_id === ""){
+		return callback("service_id must be defined.", null);
+	}
+
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err);
-
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate user provided a service id.
-		var service_id = options.service_instance_id;
-
-		if (service_id === undefined || service_id === "")
-			return callback("service_id must be defined.", null);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances/" + service_id,
@@ -374,20 +412,24 @@ WebSphereOnBluemix.prototype.delete_service_instance = function(options,  callba
 // Get all resources with respect to a service ID.
 WebSphereOnBluemix.prototype.get_resources = function(options,  callback) {
 	var self = this;
+
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	// Validate user provided a service id.
+	var service_instance_id = options.service_instance_id;
+	if (typeof service_instance_id === "undefined" || service_instance_id === ""){
+		return callback("service_instance_id must be defined.", null);
+	}
+
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err);
-
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate user provided a service id.
-		var service_instance_id = options.service_instance_id;
-		if (service_instance_id === undefined || service_instance_id === "")
-			return callback("service_instance_id must be defined.", null);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances/" + service_instance_id + "/resources",
@@ -406,25 +448,30 @@ WebSphereOnBluemix.prototype.get_resources = function(options,  callback) {
 // Get a single resource with respect to service instance ID and resource ID.
 WebSphereOnBluemix.prototype.get_resource = function(options,  callback) {
 	var self = this;
+
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	// Validate the user provided a service id.
+	var service_instance_id = options.service_instance_id;
+	if (typeof service_instance_id === "undefined" || service_instance_id === ""){
+		return callback("service_instance_id must be defined.", null);
+	}
+
+	// Validate the user provided a resource id
+	var resource_id = options.resource_id;
+	if (typeof resource_id === "undefined" || resource_id === ""){
+		return callback("resource_id must be defined.", null);
+	}
+
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err);
-
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate the user provided a service id.
-		var service_instance_id = options.service_instance_id;
-		if (service_instance_id === undefined || service_instance_id === "")
-			return callback("service_instance_id must be defined.", null);
-
-		// Validate the user provided a resource id
-		var resource_id = options.resource_id;
-		if (resource_id === undefined || resource_id === "")
-			return callback("resource_id must be defined.", null);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances/" + service_instance_id + "/resources/" + resource_id,
@@ -443,30 +490,36 @@ WebSphereOnBluemix.prototype.get_resource = function(options,  callback) {
 // Apply an action single resource with respect to service instance ID and resource ID.
 WebSphereOnBluemix.prototype.action_resource = function(options,  callback) {
 	var self = this;
+
+	// Validate the user provided an org and space.
+	var organization_name = options.organization;
+	var space_name = options.space;
+	if (typeof organization_name === "undefined" || typeof space_name === "undefined" || organization_name === "" || space_name === ""){
+		return callback("organization and space must be defined.", null);
+	}
+
+	// Validate the user provided a service id.
+	var service_instance_id = options.service_instance_id;
+	if (typeof service_instance_id === "undefined" || service_instance_id === ""){
+		return callback("service_instance_id must be defined.", null);
+	}
+
+	// Validate the user provided a resource id.
+	var resource_id = options.resource_id;
+	if (typeof resource_id === "undefined" || resource_id === ""){
+		return callback("resource_id must be defined.", null);
+	}
+
+	// Validate the user provided an action.
+	var action = options.action;
+	if (typeof action === "undefined" || action === ""){
+		return callback("action must be defined.", null);
+	}
+
 	this.get_bearer_token(function (err, bearer_token) {
-		if (err)
+		if (err){
 			return callback(err);
-
-		// Validate the user provided an org and space.
-		var organization_name = options.organization;
-		var space_name = options.space;
-		if (organization_name === undefined || space_name == undefined || organization_name === "" || space_name === "")
-			return callback("organization and space must be defined.", null);
-
-		// Validate the user provided a service id.
-		var service_instance_id = options.service_instance_id;
-		if (service_instance_id === undefined || service_instance_id === "")
-			return callback("service_instance_id must be defined.", null);
-
-		// Validate the user provided a resource id.
-		var resource_id = options.resource_id;
-		if (resource_id === undefined || resource_id === "")
-			return callback("resource_id must be defined.", null);
-
-		// Validate the user provided an action.
-		var action = options.action;
-		if (action === undefined || action === "")
-			return callback("action must be defined.", null);
+		}
 
 		var request_options = {
 			url: self.api_url + "/organizations/" + organization_name + "/spaces/" + space_name + "/serviceinstances/" + service_instance_id + "/resources/" + resource_id + "?action=" + action,
@@ -522,8 +575,8 @@ WebSphereOnBluemix.prototype.send_request = function (request_options, callback)
 						return callback(err, null);
 					}
 					// The request was good, but the API told us something went wrong.
-					else if (res.statusCode != 200) {
-						return callback(JSON.stringify(body));
+					else if (res.statusCode < 200 || res.statusCode > 299) {
+						return callback(JSON.stringify(body), null);
 					}
 					// Request was successful.
 					else{
@@ -533,7 +586,7 @@ WebSphereOnBluemix.prototype.send_request = function (request_options, callback)
 			});
 		}
 		// The request was good, but the API told us something went wrong.
-		else if (res.statusCode != 200) {
+		else if (res.statusCode < 200 || res.statusCode > 299) {
 			return callback(JSON.stringify(body), null);
 		}
 		// Request was successful.

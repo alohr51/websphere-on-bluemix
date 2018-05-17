@@ -41,10 +41,11 @@ wob.get_space_by_name({organization:"MyOrg", space:"MySpace"}, function(err, spa
 	}
 });
 
-// Create a single server WASaaS instance
+// Create a single server WASaaS instance and do not provision it. This requires you to finish configuration through the IBM Cloud UI
 // Type can be: 'LibertyCore', 'LibertyNDServer', 'WASBase', 'WASNDServer'
 // ApplicationServerVmSize can be: 'S', 'M', 'L', 'XL', 'XXL'
-wob.create_single_server_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCore", name:"myWASaaSLibertyCore", application_server_vm_size:"S" }, function(err, instanceDetails){
+// doProvision: true, false. Allows you to create a subscription, but not provision it yet
+wob.create_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCore", name:"myWASaaSLibertyCore", application_server_vm_size:"S", doProvision }, function(err, instanceDetails){
 	if(err){
 		console.error(err);
 	}
@@ -54,7 +55,7 @@ wob.create_single_server_service_instance({organization:"MyOrg", space:"MySpace"
 });
 
 // Create a Small Liberty Core and then start monitoring it for completion using "resource_status" feature.
-wob.create_single_server_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCore", name:"myWASaaSLibertyCore", application_server_vm_size:"S" }, function(err, serviceDetails){
+wob.create_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCore", name:"myWASaaSLibertyCore", application_server_vm_size:"S" }, function(err, serviceDetails){
 	if(err){
 		console.error(err);
 	}
@@ -79,7 +80,7 @@ wob.create_single_server_service_instance({organization:"MyOrg", space:"MySpace"
 // ApplicationServerVmSize The size of the Controller/Dmgr can be: 'S', 'M', 'L', 'XL', 'XXL'
 // ControlServerVMSize  the size of the nodes can be: 'S', 'M', 'L', 'XL', 'XXL'
 // number_of_app_vms is the number of nodes your Cell or Collective will have
-wob.create_multi_server_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCollective", name:"myWASaaSCollective", application_server_vm_size:"S", control_server_vm_size:"S", number_of_app_vms: 1 }, function(err, instanceDetails){
+wob.create_service_instance({organization:"MyOrg", space:"MySpace", type:"LibertyCollective", name:"myWASaaSCollective", application_server_vm_size:"S", control_server_vm_size:"S", number_of_app_vms: 1 }, function(err, instanceDetails){
 	if(err){
 		console.error(err);
 	}
